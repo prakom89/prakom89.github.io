@@ -1,1 +1,1 @@
-https://storage.googleapis.com/workbox-cdn/releases/5.1.4/workbox-sw.js
+https://github.com/prakom89/prakom89.github.io
