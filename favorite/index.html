@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta name="description" content="Footbal Data Information PWA With Workbox" />
+    <meta charset="UTF-8" />
+    <title>Football Information</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/css/materialize.min.css" media="screen,projection" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/img/192.png">
+    <meta name="theme-color" content="#07a4f2" />
+</head>
+
+<body>
+
+    <!-- Navigasi -->
+    <nav class="blue lighten-3" role="navigation">
+        <div class="nav-wrapper container">
+            <a href="/index.html#team" data-target="nav-mobile" class="waves-effect sidenav-trigger"><i class="material-icons">arrow_back</i></a>
+            <ul class="topnav right hide-on-med-and-down">
+                <li><a class="waves-effect waves-light" href="/index.html#team">Back To Team Menu</a></li>
+            </ul>
+            <a href="#" class="brand-logo" id="logo-container"><img src="/img/icon.png" alt="" width="90px"></a>
+        </div>
+    </nav>
+    <!-- Akhir Navigasi -->
+
+
+    <main id="body-content" class="container">
+        <div class="row" id="favorite-team">
+            <!-- data group disini -->
+        </div>
+    </main>
+
+
+    <script src="/js/materialize.min.js"></script>
+    <script src="/js/idb.js"></script>
+    <script>
+        // REGISTER SERVICE WORKER
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", function() {
+                navigator.serviceWorker
+                    .register("/sw.js")
+                    .then(function() {
+                        console.log("Service worker is registered");
+                    })
+                    .then(function() {
+                        var dbPromise = idb.open("favorite-team", 1, function(db) {
+                            if (!db.objectStoreNames.contains("teams"))
+                                db.createObjectStore("teams", {
+                                    keyPath: "idTeam"
+                                });
+                        });
+
+                        dbPromise
+                            .then(function(db) {
+                                var tx = db.transaction("teams", "readonly");
+                                var store = tx.objectStore("teams");
+                                return store.getAll();
+                            })
+                            .then(function(data) {
+                                console.log(data);
+                                var teamsHTML = "";
+                                for (var i in data) {
+                                    teamsHTML += `
+          <div class="col s12 m6 l6">
+            <div class="card">
+              <div class="card-content">
+                <div class="center flow-text">${data[i].nameTeam}</div>
+              </div>
+              <div class="card-action right-align">
+                <button data-team-id="${data[i].idTeam}" class="deleteFavorite waves-effect waves-light btn-small red darken-3">Delete</button>
+          </div>
+          </div>
+          </div>
+        `
+
+                                    teamsHTML += "</div>"
+                                }
+                                document.getElementById("favorite-team").innerHTML = teamsHTML;
+                            })
+                            .then(function() {
+                                let deleteFavorite = document.querySelectorAll(
+                                    ".deleteFavorite"
+                                );
+
+                                deleteFavorite.forEach(function(del) {
+                                    del.addEventListener("click", function() {
+                                        let delDataPlayer = this.dataset.teamId;
+                                        dbPromise
+                                            .then(function(db) {
+                                                var tx = db.transaction("teams", "readwrite");
+                                                var store = tx.objectStore("teams");
+                                                store.delete(delDataPlayer);
+                                                return tx.complete;
+                                            })
+                                            .then(function() {
+                                                location.reload();
+                                            });
+                                        M.toast({
+                                            html: "Delete Success!",
+                                            displayLength: 1000,
+                                            outDuration: 300
+                                        });
+
+                                    });
+                                });
+                            })
+                            .catch(function() {
+                                document.getElementById("favorite-team").innerHTML =
+                                    "<h1><center>There is no Data</center></h1>";
+                            });
+                    })
+                    .catch(function() {
+                        console.log("Service worker isn't registered");
+                    });
+            });
+        } else {
+            console.log("ServiceWorker isn't supported.");
+        }
+    </script>
+</body>
+
+</html>

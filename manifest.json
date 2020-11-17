@@ -1,0 +1,17 @@
+{
+    "name": "Apps Football PWA With Workbox",
+    "short_name": "PWA",
+    "description": "Aplikasi PWA Informasi Sepak Bola",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#00897B",
+    "theme_color": "#00897B",
+    "icons": [{
+        "src": "/img/512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any maskable"
+    }],
+    "gcm_sender_id": "92285422295"
+}
